@@ -1,0 +1,7 @@
+{
+  "name": "CyberPink Christmas Tree",
+  "description": "A high-interaction 3D festive experience featuring a futuristic pink Christmas tree with gesture control via MediaPipe.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
