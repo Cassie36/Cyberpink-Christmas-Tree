@@ -1,34 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
-    <title>CyberPink Christmas</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-      body, html { margin: 0; padding: 0; height: 100%; width: 100%; background-color: #050103; overflow: hidden; }
-      #root { height: 100%; width: 100%; }
-      /* Custom scrollbar for webkit */
-      ::-webkit-scrollbar { width: 0px; background: transparent; }
-    </style>
-  <script type="importmap">
-{
-  "imports": {
-    "@react-three/drei": "https://esm.sh/@react-three/drei@^10.7.7",
-    "@react-three/fiber": "https://esm.sh/@react-three/fiber@^9.4.2",
-    "@mediapipe/tasks-vision": "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "three": "https://esm.sh/three@^0.182.0",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "@react-three/postprocessing": "https://esm.sh/@react-three/postprocessing@^3.0.4"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SVG Plant Growth Loop</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg-top: #081512;
+      --bg-bottom: #030806;
+      --stem: #3fdf8e;
+      --stem-shadow: #1e8a59;
+      --leaf-main: #69ffb2;
+      --leaf-deep: #1ecf81;
+      --glow: rgba(105, 255, 178, 0.26);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background:
+        radial-gradient(circle at 20% 18%, rgba(26, 85, 60, 0.35), transparent 48%),
+        radial-gradient(circle at 88% 78%, rgba(19, 68, 51, 0.28), transparent 52%),
+        linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+      display: grid;
+      place-items: center;
+    }
+
+    .frame {
+      position: relative;
+      width: min(90vmin, 700px);
+      aspect-ratio: 1 / 1;
+      border-radius: 2rem;
+      border: 1px solid rgba(132, 255, 195, 0.2);
+      background: radial-gradient(circle at 50% 15%, rgba(109, 255, 178, 0.08), transparent 42%);
+      box-shadow:
+        inset 0 0 0 1px rgba(165, 255, 214, 0.05),
+        0 25px 55px rgba(0, 0, 0, 0.35),
+        0 0 45px rgba(82, 255, 171, 0.08);
+      overflow: hidden;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .ground {
+      fill: rgba(6, 34, 26, 0.8);
+      filter: drop-shadow(0 -8px 18px rgba(10, 89, 56, 0.35));
+    }
+
+    .stem-glow {
+      stroke: var(--glow);
+      stroke-width: 18;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: blur(8px);
+      opacity: 0.78;
+    }
+
+    .stem {
+      stroke: var(--stem);
+      stroke-width: 9;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 0 9px rgba(73, 250, 165, 0.45));
+    }
+
+    .stem-inner {
+      stroke: rgba(194, 255, 226, 0.8);
+      stroke-width: 2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.8;
+    }
+
+    .leaf {
+      transform-origin: center;
+      filter: drop-shadow(0 0 8px rgba(105, 255, 178, 0.42));
+    }
+
+    .leaf-shape {
+      fill: url(#leafGradient);
+      stroke: rgba(173, 255, 217, 0.42);
+      stroke-width: 1;
+    }
+
+    .leaf-vein {
+      stroke: rgba(223, 255, 240, 0.7);
+      stroke-width: 0.9;
+      fill: none;
+      opacity: 0.9;
+    }
+
+    .hint {
+      position: absolute;
+      bottom: 0.8rem;
+      width: 100%;
+      text-align: center;
+      color: rgba(184, 255, 223, 0.8);
+      font-size: clamp(0.72rem, 1.3vw, 0.95rem);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+  </style>
 </head>
-  <body>
-    <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 600 600" aria-label="Animated SVG plant growing and looping">
+      <defs>
+        <linearGradient id="leafGradient" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="var(--leaf-main)" />
+          <stop offset="100%" stop-color="var(--leaf-deep)" />
+        </linearGradient>
+      </defs>
+
+      <rect x="0" y="500" width="600" height="120" class="ground" rx="35" />
+
+      <path id="stemGlow" class="stem-glow" d="M300 500 C298 450 306 410 292 360 C278 310 330 250 300 110" />
+      <path id="stemMain" class="stem" d="M300 500 C298 450 306 410 292 360 C278 310 330 250 300 110" />
+      <path id="stemInner" class="stem-inner" d="M300 500 C298 450 306 410 292 360 C278 310 330 250 300 110" />
+
+      <g id="leafLayer"></g>
+    </svg>
+    <div class="hint">SVG growth loop • spring + wind motion • no libraries</div>
+  </div>
+
+  <script>
+    const stem = document.getElementById('stemMain');
+    const stemGlow = document.getElementById('stemGlow');
+    const stemInner = document.getElementById('stemInner');
+    const leafLayer = document.getElementById('leafLayer');
+
+    const stemLength = stem.getTotalLength();
+    for (const path of [stem, stemGlow, stemInner]) {
+      path.style.strokeDasharray = stemLength;
+      path.style.strokeDashoffset = stemLength;
+    }
+
+    const leaves = [
+      { attach: 0.12, side: -1, size: 1.05, delay: 0.08, phase: 0.0 },
+      { attach: 0.20, side: 1,  size: 1.12, delay: 0.14, phase: 0.4 },
+      { attach: 0.33, side: -1, size: 1.00, delay: 0.22, phase: 0.9 },
+      { attach: 0.48, side: 1,  size: 0.88, delay: 0.28, phase: 1.2 },
+      { attach: 0.63, side: -1, size: 0.75, delay: 0.35, phase: 1.8 },
+      { attach: 0.77, side: 1,  size: 0.65, delay: 0.42, phase: 2.1 }
+    ].map((cfg, i) => {
+      const point = stem.getPointAtLength(stemLength * cfg.attach);
+      const near = stem.getPointAtLength(Math.min(stemLength, stemLength * cfg.attach + 1));
+      const tangent = Math.atan2(near.y - point.y, near.x - point.x);
+
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.setAttribute('class', 'leaf');
+      g.setAttribute('id', `leaf-${i}`);
+
+      const baseScale = 56 * cfg.size;
+      const leafPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      leafPath.setAttribute('class', 'leaf-shape');
+      leafPath.setAttribute('d', `M0 0 C ${42 * cfg.side} -10, ${62 * cfg.side} -58, 0 -${baseScale} C ${-16 * cfg.side} -${baseScale * 0.72}, ${-20 * cfg.side} -18, 0 0 Z`);
+
+      const vein = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      vein.setAttribute('class', 'leaf-vein');
+      vein.setAttribute('d', `M0 0 C ${18 * cfg.side} -18, ${16 * cfg.side} -${baseScale * 0.62}, 0 -${baseScale}`);
+
+      g.appendChild(leafPath);
+      g.appendChild(vein);
+      leafLayer.appendChild(g);
+
+      return { ...cfg, g, x: point.x, y: point.y, tangent, baseScale };
+    });
+
+    const cycleMs = 8600;
+    const clamp01 = (v) => Math.max(0, Math.min(1, v));
+    const smooth = (v) => v * v * (3 - 2 * v);
+
+    function spring(t) {
+      // damped overshoot response from 0..1 with gentle bounce
+      const c = clamp01(t);
+      return 1 - Math.exp(-6 * c) * Math.cos(11.2 * c);
+    }
+
+    function growthWindow(phase) {
+      // 0 -> grow -> hold -> reset to 0, matching start/end for seamless loops
+      if (phase < 0.62) return smooth(phase / 0.62);
+      if (phase < 0.92) return 1;
+      return smooth(1 - (phase - 0.92) / 0.08);
+    }
+
+    function animate(now) {
+      const phase = (now % cycleMs) / cycleMs;
+      const stemGrow = growthWindow(phase);
+      const visibleLength = stemLength * stemGrow;
+      const dashOffset = stemLength - visibleLength;
+
+      stem.style.strokeDashoffset = dashOffset;
+      stemGlow.style.strokeDashoffset = dashOffset;
+      stemInner.style.strokeDashoffset = dashOffset;
+
+      leaves.forEach((leaf, i) => {
+        const local = clamp01((phase - leaf.delay) / 0.36);
+        const unfurl = spring(local) * stemGrow;
+
+        const wind = Math.sin(now * 0.0014 + leaf.phase) * 7;
+        const drift = Math.sin(now * 0.001 + i * 0.7) * 2.5;
+        const bounce = Math.sin(now * 0.004 + i) * 2 * unfurl;
+
+        const angleBase = leaf.side < 0 ? -124 : 124;
+        const unfurlAngle = (1 - unfurl) * (leaf.side < 0 ? -76 : 76);
+        const rotation = leaf.tangent * (180 / Math.PI) + angleBase + unfurlAngle + wind;
+
+        const scale = Math.max(0.001, unfurl);
+        const tx = leaf.x + drift;
+        const ty = leaf.y + bounce;
+
+        leaf.g.setAttribute('transform', `translate(${tx.toFixed(2)} ${ty.toFixed(2)}) rotate(${rotation.toFixed(2)}) scale(${scale.toFixed(3)})`);
+        leaf.g.style.opacity = (0.2 + unfurl * 0.8).toFixed(3);
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+  </script>
 </body>
 </html>
